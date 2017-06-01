@@ -1,0 +1,22 @@
+node {
+// git "https://github.com/gt-python-16/CalcJenkinsfile.git"
+
+def group = ""
+if(params.add) {group+="add"}
+if(params.sub) {
+    if(group.length()>0) {group+=","}
+    group+="sub"}
+if(params.multiply) {
+    if(group.length()>0) {group+=","} 
+    group+="multiply"}
+if(params.divide) {
+    if(group.length()>0) {group+=","} 
+    group+="divide"} 
+if(group == "add,sub,multiply,divide") (group="all")
+git "https://github.com/gt-python-16/" + repo + ".git"
+def mvnHome = tool 'Maven 3.5.0'
+// sh "'${mvnHome}/bin/mvn' clean site -Dgroups=all"
+sh "'${mvnHome}/bin/mvn' clean site -Dgroups=" + group
+stage('Test') 		   {step([$class: 'Publisher', testResults: '**/testng-results.xml'])}
+stage('Code Coverage') {step([$class: 'JacocoPublisher', execPattern:'**/**.exec', classPattern: '**/classes', sourcePattern: '**/src/main/java'])}
+	}
